@@ -9,11 +9,13 @@ const (
 
 type Game struct {
 	world World
+	zoom  int
 }
 
 func NewGame() (self *Game) {
 	self = new(Game)
-	self.world.Init()
+	self.zoom = 2
+	self.world.Init(self.zoom)
 	return
 }
 
@@ -29,5 +31,5 @@ func (self *Game) Draw(screen *ebiten.Image) {
 }
 
 func (self *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
-	return outsideWidth, outsideHeight
+	return outsideWidth / self.zoom, outsideHeight / self.zoom
 }
