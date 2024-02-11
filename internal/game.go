@@ -35,14 +35,14 @@ func (self *Game) HandleRestart() {
 }
 
 func (self *Game) HandleZoomOut() {
-	if state.paused && inpututil.IsKeyJustPressed(ebiten.KeyMinus) && state.zoom > 0 {
+	if state.paused && inpututil.IsKeyJustPressed(ebiten.KeyComma) && state.zoom > 1 {
 		state.zoom--
 		self.world.Init()
 	}
 }
 
 func (self *Game) HandleZoomIn() {
-	if state.paused && inpututil.IsKeyJustPressed(ebiten.KeyShift) && inpututil.IsKeyJustPressed(ebiten.KeyEqual) && state.zoom < 5 {
+	if state.paused && inpututil.IsKeyJustPressed(ebiten.KeyPeriod) && state.zoom < 5 {
 		state.zoom++
 		self.world.Init()
 	}
@@ -63,7 +63,9 @@ func (self *Game) Update() (err error) {
 func (self *Game) Draw(screen *ebiten.Image) {
 	self.world.Draw()
 	pixels := self.world.Pixels()
-	screen.WritePixels(pixels)
+	if screen.Bounds().Dx()*screen.Bounds().Dy()*4 == len(pixels) {
+		screen.WritePixels(pixels)
+	}
 }
 
 func (self *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
