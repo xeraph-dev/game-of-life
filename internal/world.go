@@ -45,7 +45,7 @@ func (self *World) Init(zoom int) {
 }
 
 func (self World) Pixels() []byte {
-	return self.pixels[:]
+	return self.pixels
 }
 
 func (self *World) Update() (err error) {
