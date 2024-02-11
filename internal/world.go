@@ -17,11 +17,8 @@ func (self *World) Init() {
 
 	for cy := range self.cells {
 		for cx := range self.cells[cy] {
-			pixels := [4]*byte{}
-
-			for i := 0; i < 4; i++ {
-				pixels[i] = &self.pixels[cy*len(self.cells[cy])*4+cx*4+i]
-			}
+			pos := cy*len(self.cells[cy])*4 + cx*4
+			pixels := self.pixels[pos : pos+4]
 
 			neighbors := [8]*Cell{}
 			ni := 0

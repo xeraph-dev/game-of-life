@@ -1,13 +1,13 @@
 package internal
 
 type Cell struct {
-	pixels    [4]*byte
+	pixels    []byte
 	neighbors [8]*Cell
 	alive     bool
 	wasAlive  bool
 }
 
-func (self *Cell) Init(pixels [4]*byte, neighbors [8]*Cell) {
+func (self *Cell) Init(pixels []byte, neighbors [8]*Cell) {
 	self.pixels = pixels
 	self.neighbors = neighbors
 	self.alive = randomBool()
@@ -30,8 +30,8 @@ func (self *Cell) Update() (err error) {
 }
 
 func (self *Cell) Draw() {
-	for _, pixel := range self.pixels {
-		*pixel = self.byte()
+	for i := range self.pixels {
+		self.pixels[i] = self.byte()
 	}
 	self.wasAlive = self.alive
 }
