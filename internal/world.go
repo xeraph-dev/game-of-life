@@ -3,13 +3,11 @@ package internal
 type World struct {
 	cells  [][]Cell
 	pixels []byte
-	zoom   int
 }
 
-func (self *World) Init(zoom int) {
-	self.zoom = zoom
-	width := ScreenWidth / self.zoom
-	height := ScreenHeight / self.zoom
+func (self *World) Init() {
+	width := ScreenWidth / state.zoom
+	height := ScreenHeight / state.zoom
 
 	self.cells = make([][]Cell, height)
 	for i := range self.cells {
