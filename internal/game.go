@@ -5,69 +5,61 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
-const (
-	ScreenWidth  = 640
-	ScreenHeight = 480
-)
-
 type Game struct {
+	hud   HUD
 	world World
 }
 
-func NewGame() (self *Game) {
-	self = new(Game)
-	self.world.Init()
+func NewGame() (g *Game) {
+	g = new(Game)
+	g.world.Init()
+	g.hud.Init()
 	return
 }
 
-func (self *Game) HandlePaused() {
+func (g *Game) HandleShortcuts() {
+	// handle play/pause
 	if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
-		state.paused = !state.paused
+		state.Paused = !state.Paused
 	}
 
-}
-
-func (self *Game) HandleRestart() {
+	// handle restart
 	if inpututil.IsKeyJustPressed(ebiten.KeyR) {
-		self.world.Init()
-		state.paused = false
+		state.Paused = true
+		g.world.Init()
+
+	}
+
+	// handle zoom out
+	if state.Paused && inpututil.IsKeyJustPressed(ebiten.KeyComma) && state.Zoom > 1 {
+		state.Zoom--
+		g.world.Init()
+	}
+
+	// handle zoom in
+	if state.Paused && inpututil.IsKeyJustPressed(ebiten.KeyPeriod) && state.Zoom < 5 {
+		state.Zoom++
+		g.world.Init()
 	}
 }
 
-func (self *Game) HandleZoomOut() {
-	if state.paused && inpututil.IsKeyJustPressed(ebiten.KeyComma) && state.zoom > 1 {
-		state.zoom--
-		self.world.Init()
+func (g *Game) Update() (err error) {
+	g.HandleShortcuts()
+	if !state.Paused {
+		err = g.world.Update()
 	}
-}
-
-func (self *Game) HandleZoomIn() {
-	if state.paused && inpututil.IsKeyJustPressed(ebiten.KeyPeriod) && state.zoom < 5 {
-		state.zoom++
-		self.world.Init()
-	}
-}
-
-func (self *Game) Update() (err error) {
-	self.HandlePaused()
-	self.HandleRestart()
-	self.HandleZoomOut()
-	self.HandleZoomIn()
-
-	if !state.paused {
-		err = self.world.Update()
-	}
+	g.hud.Update()
 	return
 }
 
-func (self *Game) Draw(screen *ebiten.Image) {
-	self.world.Draw()
-	pixels := self.world.Pixels()
-	if screen.Bounds().Dx()*screen.Bounds().Dy()*4 == len(pixels) {
-		screen.WritePixels(pixels)
+func (g *Game) Draw(screen *ebiten.Image) {
+	g.world.Draw()
+	if screen.Bounds().Dx()*screen.Bounds().Dy()*4 == len(g.world.Pixels) {
+		screen.WritePixels(g.world.Pixels)
 	}
+	g.hud.Draw(screen)
 }
 
-func (self *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
-	return outsideWidth / state.zoom, outsideHeight / state.zoom
+func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
+	return outsideWidth, outsideHeight
 }

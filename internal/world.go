@@ -1,61 +1,67 @@
 package internal
 
 type World struct {
-	cells  [][]Cell
-	pixels []byte
+	Pixels []byte
+	cells  [][]*Cell
 }
 
-func (self *World) Init() {
-	width := ScreenWidth / state.zoom
-	height := ScreenHeight / state.zoom
+func (w *World) Init() {
+	width, height := state.ScreenWidth, state.ScreenHeight
+	zoom := state.Zoom
 
-	self.cells = make([][]Cell, height)
-	for i := range self.cells {
-		self.cells[i] = make([]Cell, width)
+	w.Pixels = make([]byte, width*height*4)
+
+	w.cells = make([][]*Cell, height/zoom)
+	for cy := range w.cells {
+		w.cells[cy] = make([]*Cell, width/zoom)
+		for cx := range w.cells[cy] {
+			w.cells[cy][cx] = NewCell()
+		}
 	}
-	self.pixels = make([]byte, width*height*4)
 
-	for cy := range self.cells {
-		for cx := range self.cells[cy] {
-			pos := cy*len(self.cells[cy])*4 + cx*4
-			pixels := self.pixels[pos : pos+4]
+	for cy, cells := range w.cells {
+		for cx, cell := range cells {
+			for py := range cell.pixels {
+				for px := range cell.pixels[py] {
+					cell.pixels[py][px] = NewPixel()
+					pixel := cell.pixels[py][px]
+					pos := py*width + cy*width*zoom + px + cx*zoom
+					pixel.pixels = w.Pixels[pos*4 : pos*4+4]
+				}
+			}
 
-			neighbors := [8]*Cell{}
 			ni := 0
 			for y := cy - 1; y <= cy+1; y++ {
 				for x := cx - 1; x <= cx+1; x++ {
 					if x == cx && y == cy {
 						continue
 					}
-					if y >= 0 && x >= 0 && y < len(self.cells) && x < len(self.cells[cy]) {
-						neighbors[ni] = &self.cells[y][x]
+					if y >= 0 && x >= 0 && y < len(w.cells) && x < len(w.cells[cy]) {
+						cell.neighbors[ni] = w.cells[y][x]
 					}
 					ni++
 				}
 			}
 
-			self.cells[cy][cx].Init(pixels, neighbors)
 		}
 	}
 }
 
-func (self World) Pixels() []byte {
-	return self.pixels
-}
-
-func (self *World) Update() (err error) {
-	for cy := range self.cells {
-		for cx := range self.cells[cy] {
-			self.cells[cy][cx].Update()
+func (w *World) Update() (err error) {
+	for _, cells := range w.cells {
+		for _, cell := range cells {
+			if err = cell.Update(); err != nil {
+				return
+			}
 		}
 	}
 	return
 }
 
-func (self *World) Draw() {
-	for cy := range self.cells {
-		for cx := range self.cells[cy] {
-			self.cells[cy][cx].Draw()
+func (w *World) Draw() {
+	for _, cells := range w.cells {
+		for _, cell := range cells {
+			cell.Draw()
 		}
 	}
 }
