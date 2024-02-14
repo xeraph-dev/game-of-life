@@ -3,10 +3,13 @@ package internal
 import (
 	"game-of-life/internal/assets"
 	"game-of-life/internal/custom"
+	"image/color"
 
 	"github.com/ebitenui/ebitenui"
 	"github.com/ebitenui/ebitenui/widget"
+	"github.com/golang/freetype/truetype"
 	"github.com/hajimehoshi/ebiten/v2"
+	"golang.org/x/image/font/gofont/goregular"
 )
 
 type HUD struct {
@@ -16,6 +19,7 @@ type HUD struct {
 	zoomIn  *widget.Button
 	zoomOut *widget.Button
 	restart *widget.Button
+	fps     *widget.Label
 }
 
 type HUDOptions struct {
@@ -74,6 +78,35 @@ func (h *HUD) Init(opts HUDOptions) {
 	buttonsContainer.AddChild(h.zoomOut)
 
 	h.ui.Container.AddChild(buttonsContainer)
+
+	fpsContainer := widget.NewContainer(
+		widget.ContainerOpts.Layout(widget.NewAnchorLayout(
+			widget.AnchorLayoutOpts.Padding(widget.NewInsetsSimple(6)),
+		)),
+		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(
+			widget.AnchorLayoutData{
+				HorizontalPosition: widget.AnchorLayoutPositionStart,
+			},
+		)),
+	)
+
+	ttfFont, err := truetype.Parse(goregular.TTF)
+	if err != nil {
+		panic(err)
+	}
+	face := truetype.NewFace(ttfFont, &truetype.Options{
+		Size: 24,
+	})
+
+	h.fps = widget.NewLabel(
+		widget.LabelOpts.Text("FPS", face, &widget.LabelColor{
+			Idle: color.White,
+		}),
+	)
+
+	fpsContainer.AddChild(h.fps)
+
+	h.ui.Container.AddChild(fpsContainer)
 }
 
 func (h *HUD) Update() {

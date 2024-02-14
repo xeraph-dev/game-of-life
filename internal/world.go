@@ -6,7 +6,6 @@ type World struct {
 }
 
 func (w *World) Init() {
-
 	width, height := state.ScreenWidth, state.ScreenHeight
 	zoom := state.Zoom
 	offset := width * 40

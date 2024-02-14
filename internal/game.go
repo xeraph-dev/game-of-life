@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"fmt"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
@@ -79,6 +81,10 @@ func (g *Game) HandleShortcuts() {
 	}
 }
 
+func (g *Game) UpdateFps() {
+	g.hud.fps.Label = fmt.Sprintf("FPS: %d", int(ebiten.ActualFPS()))
+}
+
 func (g *Game) Update() (err error) {
 	g.HandleShortcuts()
 
@@ -87,6 +93,7 @@ func (g *Game) Update() (err error) {
 	}
 
 	g.HandleDisableButtons()
+	g.UpdateFps()
 	g.hud.Update()
 	return
 }
