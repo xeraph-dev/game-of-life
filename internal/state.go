@@ -13,7 +13,7 @@ type State struct {
 var state State
 
 func init() {
-	state.Zoom = 1
+	state.Zoom = 2
 	state.Paused = true
 	state.ScreenWidth = ScreenWidth
 	state.ScreenHeight = ScreenHeight

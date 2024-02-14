@@ -6,8 +6,10 @@ type World struct {
 }
 
 func (w *World) Init() {
+
 	width, height := state.ScreenWidth, state.ScreenHeight
 	zoom := state.Zoom
+	offset := width * 40
 
 	w.Pixels = make([]byte, width*height*4)
 
@@ -23,9 +25,12 @@ func (w *World) Init() {
 		for cx, cell := range cells {
 			for py := range cell.pixels {
 				for px := range cell.pixels[py] {
+					pos := py*width + cy*width*zoom + px + cx*zoom
+					if pos < offset {
+						continue
+					}
 					cell.pixels[py][px] = NewPixel()
 					pixel := cell.pixels[py][px]
-					pos := py*width + cy*width*zoom + px + cx*zoom
 					pixel.pixels = w.Pixels[pos*4 : pos*4+4]
 				}
 			}

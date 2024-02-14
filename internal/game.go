@@ -13,41 +13,80 @@ type Game struct {
 func NewGame() (g *Game) {
 	g = new(Game)
 	g.world.Init()
-	g.hud.Init()
+	g.hud.Init(HUDOptions{
+		Play:    g.Play,
+		Pause:   g.Pause,
+		ZoomIn:  g.ZoomIn,
+		ZoomOut: g.ZoomOut,
+		Restart: g.Restart,
+	})
 	return
 }
 
-func (g *Game) HandleShortcuts() {
-	// handle play/pause
-	if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
-		state.Paused = !state.Paused
-	}
+func (g *Game) Play() {
+	state.Paused = false
+}
 
-	// handle restart
-	if inpututil.IsKeyJustPressed(ebiten.KeyR) {
-		state.Paused = true
-		g.world.Init()
+func (g *Game) Pause() {
+	state.Paused = true
+}
 
-	}
+func (g *Game) PlayPause() {
+	state.Paused = !state.Paused
+}
 
-	// handle zoom out
-	if state.Paused && inpututil.IsKeyJustPressed(ebiten.KeyComma) && state.Zoom > 1 {
-		state.Zoom--
-		g.world.Init()
-	}
+func (g *Game) Restart() {
+	g.Pause()
+	g.world.Init()
+}
 
-	// handle zoom in
-	if state.Paused && inpututil.IsKeyJustPressed(ebiten.KeyPeriod) && state.Zoom < 5 {
+func (g *Game) ZoomIn() {
+	if state.Paused && state.Zoom < 5 {
 		state.Zoom++
 		g.world.Init()
 	}
 }
 
+func (g *Game) ZoomOut() {
+	if state.Paused && state.Zoom > 1 {
+		state.Zoom--
+		g.world.Init()
+	}
+}
+
+func (g *Game) HandleDisableButtons() {
+	g.hud.play.GetWidget().Disabled = !state.Paused
+	g.hud.pause.GetWidget().Disabled = state.Paused
+	g.hud.zoomIn.GetWidget().Disabled = !state.Paused || state.Zoom >= 5
+	g.hud.zoomOut.GetWidget().Disabled = !state.Paused || state.Zoom <= 1
+}
+
+func (g *Game) HandleShortcuts() {
+	if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+		g.PlayPause()
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyR) {
+		g.Restart()
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyComma) {
+		g.ZoomOut()
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyPeriod) {
+		g.ZoomIn()
+	}
+}
+
 func (g *Game) Update() (err error) {
 	g.HandleShortcuts()
+
 	if !state.Paused {
 		err = g.world.Update()
 	}
+
+	g.HandleDisableButtons()
 	g.hud.Update()
 	return
 }
