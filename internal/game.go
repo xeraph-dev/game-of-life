@@ -100,9 +100,7 @@ func (g *Game) Update() (err error) {
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.world.Draw()
-	if screen.Bounds().Dx()*screen.Bounds().Dy()*4 == len(g.world.Pixels) {
-		screen.WritePixels(g.world.Pixels)
-	}
+	screen.WritePixels(g.world.Pixels)
 	g.hud.Draw(screen)
 }
 
