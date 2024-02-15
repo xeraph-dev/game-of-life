@@ -11,7 +11,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-func NewIconButton(icon assets.Icon, clickedHandler func(args *widget.ButtonClickedEventArgs)) *widget.Button {
+func NewIconButton(icon assets.Icon, clickedHandler func()) *widget.Button {
 	var img image.Image
 	var err error
 
@@ -36,7 +36,7 @@ func NewIconButton(icon assets.Icon, clickedHandler func(args *widget.ButtonClic
 
 	button := widget.NewButton(
 		widget.ButtonOpts.Image(buttonImage),
-		widget.ButtonOpts.ClickedHandler(clickedHandler),
+		widget.ButtonOpts.ClickedHandler(func(args *widget.ButtonClickedEventArgs) { clickedHandler() }),
 		widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
 			MaxWidth:  buttonSize,
 			MaxHeight: buttonSize,

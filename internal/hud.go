@@ -18,6 +18,9 @@ type HUD struct {
 	pause   *widget.Button
 	zoomIn  *widget.Button
 	zoomOut *widget.Button
+	fast    *widget.Button
+	slow    *widget.Button
+	step    *widget.Button
 	restart *widget.Button
 	fps     *widget.Label
 }
@@ -27,6 +30,9 @@ type HUDOptions struct {
 	Pause   func()
 	ZoomIn  func()
 	ZoomOut func()
+	Fast    func()
+	Slow    func()
+	Step    func()
 	Restart func()
 }
 
@@ -39,25 +45,14 @@ func (h *HUD) Init(opts HUDOptions) {
 		)),
 	)
 
-	h.play = custom.NewIconButton(assets.PlayIcon, func(args *widget.ButtonClickedEventArgs) {
-		opts.Play()
-	})
-
-	h.pause = custom.NewIconButton(assets.PauseIcon, func(args *widget.ButtonClickedEventArgs) {
-		opts.Pause()
-	})
-
-	h.zoomIn = custom.NewIconButton(assets.PlusIcon, func(args *widget.ButtonClickedEventArgs) {
-		opts.ZoomIn()
-	})
-
-	h.zoomOut = custom.NewIconButton(assets.MinusIcon, func(args *widget.ButtonClickedEventArgs) {
-		opts.ZoomOut()
-	})
-
-	h.restart = custom.NewIconButton(assets.RestartIcon, func(args *widget.ButtonClickedEventArgs) {
-		opts.Restart()
-	})
+	h.play = custom.NewIconButton(assets.PlayIcon, opts.Play)
+	h.pause = custom.NewIconButton(assets.PauseIcon, opts.Pause)
+	h.zoomIn = custom.NewIconButton(assets.PlusIcon, opts.ZoomIn)
+	h.zoomOut = custom.NewIconButton(assets.MinusIcon, opts.ZoomOut)
+	h.fast = custom.NewIconButton(assets.FastIcon, opts.Fast)
+	h.slow = custom.NewIconButton(assets.SlowIcon, opts.Slow)
+	h.step = custom.NewIconButton(assets.StepIcon, opts.Step)
+	h.restart = custom.NewIconButton(assets.RestartIcon, opts.Restart)
 
 	buttonsContainer := widget.NewContainer(
 		widget.ContainerOpts.Layout(widget.NewRowLayout(
@@ -73,9 +68,12 @@ func (h *HUD) Init(opts HUDOptions) {
 
 	buttonsContainer.AddChild(h.restart)
 	buttonsContainer.AddChild(h.play)
+	buttonsContainer.AddChild(h.step)
 	buttonsContainer.AddChild(h.pause)
 	buttonsContainer.AddChild(h.zoomIn)
 	buttonsContainer.AddChild(h.zoomOut)
+	buttonsContainer.AddChild(h.slow)
+	buttonsContainer.AddChild(h.fast)
 
 	h.ui.Container.AddChild(buttonsContainer)
 

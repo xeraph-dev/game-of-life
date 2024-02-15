@@ -19,6 +19,9 @@ var (
 	PauseIcon   = newIcon(pauseFilled, pauseOutline)
 	PlusIcon    = newIcon(plusFilled, plusOutline)
 	MinusIcon   = newIcon(minusFilled, minusOutline)
+	SlowIcon    = newIcon(slowFilled, slowOutline)
+	FastIcon    = newIcon(fastFilled, fastOutline)
+	StepIcon    = newIcon(stepFilled, stepOutline)
 	RestartIcon = newIcon(restart, restart)
 )
 
@@ -45,6 +48,24 @@ var minusFilled []byte
 
 //go:embed icons/minus_outline.png
 var minusOutline []byte
+
+//go:embed icons/slow_filled.png
+var slowFilled []byte
+
+//go:embed icons/slow_outline.png
+var slowOutline []byte
+
+//go:embed icons/fast_filled.png
+var fastFilled []byte
+
+//go:embed icons/fast_outline.png
+var fastOutline []byte
+
+//go:embed icons/step_filled.png
+var stepFilled []byte
+
+//go:embed icons/step_outline.png
+var stepOutline []byte
 
 //go:embed icons/restart.png
 var restart []byte

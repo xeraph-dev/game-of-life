@@ -13,11 +13,12 @@ type Game struct {
 	width, height int
 	zoom          int
 	paused        bool
+	speed         int
 }
 
-func NewGame(width, height, zoom int) (g *Game) {
+func NewGame() (g *Game) {
 	g = new(Game)
-	g.width, g.height, g.zoom = width, height, zoom
+	g.width, g.height, g.zoom, g.speed = InitialScreenWidth, InitialScreenHeight, InitialZoom, InitialSpeed
 	g.paused = true
 	g.InitWorld()
 	g.hud.Init(HUDOptions{
@@ -26,6 +27,9 @@ func NewGame(width, height, zoom int) (g *Game) {
 		ZoomIn:  g.ZoomIn,
 		ZoomOut: g.ZoomOut,
 		Restart: g.Restart,
+		Fast:    g.Fast,
+		Slow:    g.Slow,
+		Step:    g.Step,
 	})
 	return
 }
@@ -36,10 +40,12 @@ func (g *Game) InitWorld() {
 
 func (g *Game) Play() {
 	g.paused = false
+	g.UpdateFPS()
 }
 
 func (g *Game) Pause() {
 	g.paused = true
+	g.UpdateFPS(ebiten.DefaultTPS)
 }
 
 func (g *Game) PlayPause() {
@@ -65,11 +71,41 @@ func (g *Game) ZoomOut() {
 	}
 }
 
+func (g *Game) Fast() {
+	if !g.paused && g.speed > MinSpeed {
+		g.speed--
+		g.UpdateFPS()
+	}
+}
+
+func (g *Game) Slow() {
+	if !g.paused && g.speed < MaxSpeed {
+		g.speed++
+		g.UpdateFPS()
+	}
+}
+
+func (g *Game) Step() {
+	if g.paused {
+		g.world.Update()
+	}
+}
+
+func (g *Game) UpdateFPS(speed ...int) {
+	spd := g.speed
+	if len(speed) >= 1 {
+		spd = speed[0]
+	}
+	ebiten.SetTPS(ebiten.DefaultTPS / spd)
+}
+
 func (g *Game) HandleDisableButtons() {
 	g.hud.play.GetWidget().Disabled = !g.paused
 	g.hud.pause.GetWidget().Disabled = g.paused
 	g.hud.zoomIn.GetWidget().Disabled = !g.paused || g.zoom >= MaxZoom
 	g.hud.zoomOut.GetWidget().Disabled = !g.paused || g.zoom <= MinZoom
+	g.hud.fast.GetWidget().Disabled = g.paused || g.speed <= MinSpeed
+	g.hud.slow.GetWidget().Disabled = g.paused || g.speed >= MaxSpeed
 }
 
 func (g *Game) HandleShortcuts() {

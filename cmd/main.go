@@ -7,12 +7,11 @@ import (
 )
 
 func main() {
-	width, height, zoom := internal.InitialScreenWidth, internal.InitialScreenHeight, internal.InitialZoom
-
-	ebiten.SetWindowSize(width, height)
+	ebiten.SetWindowSize(internal.InitialScreenWidth, internal.InitialScreenHeight)
 	ebiten.SetWindowTitle("Game of Life")
+	ebiten.SetTPS(ebiten.DefaultTPS / internal.InitialSpeed)
 
-	if err := ebiten.RunGame(internal.NewGame(width, height, zoom)); err != nil {
+	if err := ebiten.RunGame(internal.NewGame()); err != nil {
 		panic(err)
 	}
 }
