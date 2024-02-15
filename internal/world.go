@@ -2,7 +2,7 @@ package internal
 
 type World struct {
 	Pixels []byte
-	cells  [][]*Cell
+	cells  [][]Cell
 }
 
 func (w *World) Init(width, height, zoom int) {
@@ -10,28 +10,14 @@ func (w *World) Init(width, height, zoom int) {
 
 	w.Pixels = make([]byte, width*height*4)
 
-	w.cells = make([][]*Cell, height/zoom)
+	w.cells = make([][]Cell, height/zoom)
 	for cy := range w.cells {
-		w.cells[cy] = make([]*Cell, width/zoom)
-		for cx := range w.cells[cy] {
-			w.cells[cy][cx] = NewCell(zoom)
-		}
+		w.cells[cy] = make([]Cell, width/zoom)
 	}
 
-	for cy, cells := range w.cells {
-		for cx, cell := range cells {
-			for py := range cell.pixels {
-				for px := range cell.pixels[py] {
-					pos := py*width + cy*width*zoom + px + cx*zoom
-					if pos < offset {
-						continue
-					}
-					cell.pixels[py][px] = NewPixel()
-					pixel := cell.pixels[py][px]
-					pixel.pixels = w.Pixels[pos*4 : pos*4+4]
-				}
-			}
-
+	for cy := range w.cells {
+		for cx := range w.cells[cy] {
+			var neighbors [8]*Cell
 			ni := 0
 			for y := cy - 1; y <= cy+1; y++ {
 				for x := cx - 1; x <= cx+1; x++ {
@@ -39,20 +25,36 @@ func (w *World) Init(width, height, zoom int) {
 						continue
 					}
 					if y >= 0 && x >= 0 && y < len(w.cells) && x < len(w.cells[cy]) {
-						cell.neighbors[ni] = w.cells[y][x]
+						neighbors[ni] = &w.cells[y][x]
 					}
 					ni++
 				}
 			}
 
+			pixels := make([][]Pixel, zoom)
+			for py := range pixels {
+				pixels[py] = make([]Pixel, zoom)
+			}
+
+			for py := range pixels {
+				for px := range pixels[py] {
+					pos := py*width + cy*width*zoom + px + cx*zoom
+					if pos < offset {
+						continue
+					}
+					pixels[py][px].pixels = w.Pixels[pos*4 : pos*4+4]
+				}
+			}
+
+			w.cells[cy][cx].Init(pixels, neighbors)
 		}
 	}
 }
 
 func (w *World) Update() (err error) {
-	for _, cells := range w.cells {
-		for _, cell := range cells {
-			if err = cell.Update(); err != nil {
+	for cy := range w.cells {
+		for cx := range w.cells[cy] {
+			if err = w.cells[cy][cx].Update(); err != nil {
 				return
 			}
 		}
@@ -61,9 +63,9 @@ func (w *World) Update() (err error) {
 }
 
 func (w *World) Draw() {
-	for _, cells := range w.cells {
-		for _, cell := range cells {
-			cell.Draw()
+	for cy := range w.cells {
+		for cx := range w.cells[cy] {
+			w.cells[cy][cx].Draw()
 		}
 	}
 }
