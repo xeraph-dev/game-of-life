@@ -11,15 +11,15 @@ type Cell struct {
 	wasAlive  bool
 }
 
-func NewCell() (c *Cell) {
+func NewCell(size int) (c *Cell) {
 	c = new(Cell)
 
 	c.alive = rand.Intn(100) < 10
 	c.wasAlive = c.alive
 
-	c.pixels = make([][]*Pixel, state.Zoom)
+	c.pixels = make([][]*Pixel, size)
 	for py := range c.pixels {
-		c.pixels[py] = make([]*Pixel, state.Zoom)
+		c.pixels[py] = make([]*Pixel, size)
 	}
 
 	return

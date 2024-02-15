@@ -5,9 +5,7 @@ type World struct {
 	cells  [][]*Cell
 }
 
-func (w *World) Init() {
-	width, height := state.ScreenWidth, state.ScreenHeight
-	zoom := state.Zoom
+func (w *World) Init(width, height, zoom int) {
 	offset := width * 40
 
 	w.Pixels = make([]byte, width*height*4)
@@ -16,7 +14,7 @@ func (w *World) Init() {
 	for cy := range w.cells {
 		w.cells[cy] = make([]*Cell, width/zoom)
 		for cx := range w.cells[cy] {
-			w.cells[cy][cx] = NewCell()
+			w.cells[cy][cx] = NewCell(zoom)
 		}
 	}
 

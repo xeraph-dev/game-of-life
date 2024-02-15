@@ -1,20 +1,25 @@
 package internal
 
 import (
-	"fmt"
+	"strconv"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 type Game struct {
-	hud   HUD
-	world World
+	hud           HUD
+	world         World
+	width, height int
+	zoom          int
+	paused        bool
 }
 
-func NewGame() (g *Game) {
+func NewGame(width, height, zoom int) (g *Game) {
 	g = new(Game)
-	g.world.Init()
+	g.width, g.height, g.zoom = width, height, zoom
+	g.paused = true
+	g.InitWorld()
 	g.hud.Init(HUDOptions{
 		Play:    g.Play,
 		Pause:   g.Pause,
@@ -25,42 +30,46 @@ func NewGame() (g *Game) {
 	return
 }
 
+func (g *Game) InitWorld() {
+	g.world.Init(g.width, g.height, g.zoom)
+}
+
 func (g *Game) Play() {
-	state.Paused = false
+	g.paused = false
 }
 
 func (g *Game) Pause() {
-	state.Paused = true
+	g.paused = true
 }
 
 func (g *Game) PlayPause() {
-	state.Paused = !state.Paused
+	g.paused = !g.paused
 }
 
 func (g *Game) Restart() {
 	g.Pause()
-	g.world.Init()
+	g.InitWorld()
 }
 
 func (g *Game) ZoomIn() {
-	if state.Paused && state.Zoom < 5 {
-		state.Zoom++
-		g.world.Init()
+	if g.paused && g.zoom < MaxZoom {
+		g.zoom++
+		g.InitWorld()
 	}
 }
 
 func (g *Game) ZoomOut() {
-	if state.Paused && state.Zoom > 1 {
-		state.Zoom--
-		g.world.Init()
+	if g.paused && g.zoom > MinZoom {
+		g.zoom--
+		g.InitWorld()
 	}
 }
 
 func (g *Game) HandleDisableButtons() {
-	g.hud.play.GetWidget().Disabled = !state.Paused
-	g.hud.pause.GetWidget().Disabled = state.Paused
-	g.hud.zoomIn.GetWidget().Disabled = !state.Paused || state.Zoom >= 5
-	g.hud.zoomOut.GetWidget().Disabled = !state.Paused || state.Zoom <= 1
+	g.hud.play.GetWidget().Disabled = !g.paused
+	g.hud.pause.GetWidget().Disabled = g.paused
+	g.hud.zoomIn.GetWidget().Disabled = !g.paused || g.zoom >= MaxZoom
+	g.hud.zoomOut.GetWidget().Disabled = !g.paused || g.zoom <= MinZoom
 }
 
 func (g *Game) HandleShortcuts() {
@@ -82,13 +91,13 @@ func (g *Game) HandleShortcuts() {
 }
 
 func (g *Game) UpdateFps() {
-	g.hud.fps.Label = fmt.Sprintf("FPS: %d", int(ebiten.ActualFPS()))
+	g.hud.fps.Label = "FPS: " + strconv.Itoa(int(ebiten.ActualFPS()))
 }
 
 func (g *Game) Update() (err error) {
 	g.HandleShortcuts()
 
-	if !state.Paused {
+	if !g.paused {
 		err = g.world.Update()
 	}
 
