@@ -8,18 +8,14 @@ import (
 )
 
 type Game struct {
-	hud           HUD
-	world         World
-	width, height int
-	zoom          int
-	paused        bool
-	speed         int
+	hud   HUD
+	world World
+	state State
 }
 
 func NewGame() (g *Game) {
 	g = new(Game)
-	g.width, g.height, g.zoom, g.speed = InitialScreenWidth, InitialScreenHeight, InitialZoom, InitialSpeed
-	g.paused = true
+	g.state.Init()
 	g.InitWorld()
 	g.hud.Init(HUDOptions{
 		Play:    g.Play,
@@ -35,21 +31,21 @@ func NewGame() (g *Game) {
 }
 
 func (g *Game) InitWorld() {
-	g.world.Init(g.width, g.height, g.zoom)
+	g.world.Init(g.state.Width(), g.state.Height(), g.state.Zoom())
 }
 
 func (g *Game) Play() {
-	g.paused = false
+	g.state.Play()
 	g.UpdateFPS()
 }
 
 func (g *Game) Pause() {
-	g.paused = true
-	g.UpdateFPS(ebiten.DefaultTPS)
+	g.state.Pause()
+	g.UpdateFPS(1)
 }
 
 func (g *Game) PlayPause() {
-	g.paused = !g.paused
+	g.state.PlayPause()
 }
 
 func (g *Game) Restart() {
@@ -58,41 +54,41 @@ func (g *Game) Restart() {
 }
 
 func (g *Game) ZoomIn() {
-	if g.paused && g.zoom < MaxZoom {
-		g.zoom++
+	if g.state.CanZoomIn() {
+		g.state.ZoomIn()
 		g.InitWorld()
 	}
 }
 
 func (g *Game) ZoomOut() {
-	if g.paused && g.zoom > MinZoom {
-		g.zoom--
+	if g.state.CanZoomOut() {
+		g.state.ZoomOut()
 		g.InitWorld()
 	}
 }
 
 func (g *Game) Fast() {
-	if !g.paused && g.speed > MinSpeed {
-		g.speed--
+	if g.state.CanFast() {
+		g.state.Fast()
 		g.UpdateFPS()
 	}
 }
 
 func (g *Game) Slow() {
-	if !g.paused && g.speed < MaxSpeed {
-		g.speed++
+	if g.state.CanSlow() {
+		g.state.Slow()
 		g.UpdateFPS()
 	}
 }
 
 func (g *Game) Step() {
-	if g.paused {
+	if g.state.Paused() {
 		g.world.Update()
 	}
 }
 
 func (g *Game) UpdateFPS(speed ...int) {
-	spd := g.speed
+	spd := g.state.Speed()
 	if len(speed) >= 1 {
 		spd = speed[0]
 	}
@@ -100,12 +96,13 @@ func (g *Game) UpdateFPS(speed ...int) {
 }
 
 func (g *Game) HandleDisableButtons() {
-	g.hud.play.GetWidget().Disabled = !g.paused
-	g.hud.pause.GetWidget().Disabled = g.paused
-	g.hud.zoomIn.GetWidget().Disabled = !g.paused || g.zoom >= MaxZoom
-	g.hud.zoomOut.GetWidget().Disabled = !g.paused || g.zoom <= MinZoom
-	g.hud.fast.GetWidget().Disabled = g.paused || g.speed <= MinSpeed
-	g.hud.slow.GetWidget().Disabled = g.paused || g.speed >= MaxSpeed
+	g.hud.play.GetWidget().Disabled = !g.state.Paused()
+	g.hud.pause.GetWidget().Disabled = g.state.Paused()
+	g.hud.step.GetWidget().Disabled = !g.state.Paused()
+	g.hud.zoomIn.GetWidget().Disabled = !g.state.CanZoomIn()
+	g.hud.zoomOut.GetWidget().Disabled = !g.state.CanZoomOut()
+	g.hud.fast.GetWidget().Disabled = !g.state.CanFast()
+	g.hud.slow.GetWidget().Disabled = !g.state.CanSlow()
 }
 
 func (g *Game) HandleShortcuts() {
@@ -132,13 +129,12 @@ func (g *Game) UpdateFps() {
 
 func (g *Game) Update() (err error) {
 	g.HandleShortcuts()
+	g.UpdateFps()
+	g.HandleDisableButtons()
 
-	if !g.paused {
+	if !g.state.Paused() {
 		err = g.world.Update()
 	}
-
-	g.HandleDisableButtons()
-	g.UpdateFps()
 	g.hud.Update()
 	return
 }
