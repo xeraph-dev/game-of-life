@@ -4,6 +4,7 @@ import (
 	"game-of-life/internal/assets"
 	"game-of-life/internal/custom"
 	"image/color"
+	"strconv"
 
 	"github.com/ebitenui/ebitenui"
 	"github.com/ebitenui/ebitenui/widget"
@@ -25,18 +26,7 @@ type HUD struct {
 	fps     *widget.Label
 }
 
-type HUDOptions struct {
-	Play    func()
-	Pause   func()
-	ZoomIn  func()
-	ZoomOut func()
-	Fast    func()
-	Slow    func()
-	Step    func()
-	Restart func()
-}
-
-func (h *HUD) Init(opts HUDOptions) {
+func (h *HUD) Init(actions Actions) {
 	h.ui = new(ebitenui.UI)
 
 	h.ui.Container = widget.NewContainer(
@@ -45,14 +35,14 @@ func (h *HUD) Init(opts HUDOptions) {
 		)),
 	)
 
-	h.play = custom.NewIconButton(assets.PlayIcon, opts.Play, custom.NewShortcut("play the world", assets.PlayIcon))
-	h.pause = custom.NewIconButton(assets.PauseIcon, opts.Pause, custom.NewShortcut("pause the world", assets.PlayIcon))
-	h.zoomIn = custom.NewIconButton(assets.PlusIcon, opts.ZoomIn, custom.NewShortcut("increase cell's size", assets.PlayIcon))
-	h.zoomOut = custom.NewIconButton(assets.MinusIcon, opts.ZoomOut, custom.NewShortcut("decrease cell's size", assets.PlayIcon))
-	h.fast = custom.NewIconButton(assets.FastIcon, opts.Fast, custom.NewShortcut("increase generation speed", assets.PlayIcon))
-	h.slow = custom.NewIconButton(assets.SlowIcon, opts.Slow, custom.NewShortcut("decrease generation speed", assets.PlayIcon))
-	h.step = custom.NewIconButton(assets.StepIcon, opts.Step, custom.NewShortcut("advance one generation", assets.PlayIcon))
-	h.restart = custom.NewIconButton(assets.RestartIcon, opts.Restart, custom.NewShortcut("regenerate the world", assets.KeyRIcon))
+	h.play = custom.NewIconButton(assets.PlayIcon, actions.Play, custom.NewShortcut("Play the world", assets.KeySpaceIcon))
+	h.pause = custom.NewIconButton(assets.PauseIcon, actions.Pause, custom.NewShortcut("Pause the world", assets.KeySpaceIcon))
+	h.zoomIn = custom.NewIconButton(assets.PlusIcon, actions.ZoomIn, custom.NewShortcut("Increase cell's size", assets.KeyPlusIcon))
+	h.zoomOut = custom.NewIconButton(assets.MinusIcon, actions.ZoomOut, custom.NewShortcut("Decrease cell's size", assets.KeyMinusIcon))
+	h.fast = custom.NewIconButton(assets.FastIcon, actions.Fast, custom.NewShortcut("Increase generation speed", assets.KeyGreaterIcon))
+	h.slow = custom.NewIconButton(assets.SlowIcon, actions.Slow, custom.NewShortcut("Decrease generation speed", assets.KeyLowerIcon))
+	h.step = custom.NewIconButton(assets.StepIcon, actions.Step, custom.NewShortcut("Advance one generation", assets.KeyPeriodIcon))
+	h.restart = custom.NewIconButton(assets.RestartIcon, actions.Restart, custom.NewShortcut("Regenerate the world", assets.KeyRIcon))
 
 	buttonsContainer := widget.NewContainer(
 		widget.ContainerOpts.Layout(widget.NewRowLayout(
@@ -107,7 +97,23 @@ func (h *HUD) Init(opts HUDOptions) {
 	h.ui.Container.AddChild(fpsContainer)
 }
 
+func (h *HUD) updateFps() {
+	h.fps.Label = "FPS: " + strconv.Itoa(int(ebiten.ActualFPS()))
+}
+
+func (h *HUD) handleDisableButtons() {
+	h.play.GetWidget().Disabled = !state.Paused()
+	h.pause.GetWidget().Disabled = state.Paused()
+	h.step.GetWidget().Disabled = !state.Paused()
+	h.zoomIn.GetWidget().Disabled = !state.CanZoomIn()
+	h.zoomOut.GetWidget().Disabled = !state.CanZoomOut()
+	h.fast.GetWidget().Disabled = !state.CanFast()
+	h.slow.GetWidget().Disabled = !state.CanSlow()
+}
+
 func (h *HUD) Update() {
+	h.updateFps()
+	h.handleDisableButtons()
 	h.ui.Update()
 }
 

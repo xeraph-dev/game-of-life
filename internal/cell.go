@@ -19,7 +19,7 @@ func (c *Cell) Init(pixels [][]Pixel, neighbors [8]*Cell) {
 	c.neighbors = neighbors
 }
 
-func (c *Cell) Update() (err error) {
+func (c *Cell) Update() {
 	alive := 0
 	for _, cell := range c.neighbors {
 		if cell != nil && cell.wasAlive {
@@ -31,7 +31,6 @@ func (c *Cell) Update() (err error) {
 	} else {
 		c.alive = alive == 3
 	}
-	return
 }
 
 func (c *Cell) Draw() {

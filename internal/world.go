@@ -51,15 +51,12 @@ func (w *World) Init(width, height, zoom int) {
 	}
 }
 
-func (w *World) Update() (err error) {
+func (w *World) Update() {
 	for cy := range w.cells {
 		for cx := range w.cells[cy] {
-			if err = w.cells[cy][cx].Update(); err != nil {
-				return
-			}
+			w.cells[cy][cx].Update()
 		}
 	}
-	return
 }
 
 func (w *World) Draw() {

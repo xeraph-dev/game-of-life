@@ -49,3 +49,24 @@ var restart []byte
 
 //go:embed icons/key_r.png
 var keyR []byte
+
+//go:embed icons/key_comma.png
+var keyComma []byte
+
+//go:embed icons/key_period.png
+var keyPeriod []byte
+
+//go:embed icons/key_greater.png
+var keyGreater []byte
+
+//go:embed icons/key_lower.png
+var keyLower []byte
+
+//go:embed icons/key_plus.png
+var keyPlus []byte
+
+//go:embed icons/key_minus.png
+var keyMinus []byte
+
+//go:embed icons/key_space.png
+var keySpace []byte

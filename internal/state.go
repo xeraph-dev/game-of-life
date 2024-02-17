@@ -18,6 +18,8 @@ type State struct {
 	}
 }
 
+var state State
+
 func (s *State) Init() {
 	defer func() {
 		go s.save()
