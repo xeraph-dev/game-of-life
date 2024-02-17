@@ -1,24 +1,75 @@
 package internal
 
-import "sync"
+import (
+	"fmt"
+	"sync"
+)
 
 type State struct {
-	width  int
-	height int
-	zoom   int
-	paused bool
-	speed  int
-	m      sync.RWMutex
+	width   int
+	height  int
+	zoom    int
+	paused  bool
+	speed   int
+	m       sync.RWMutex
+	_config struct {
+		ok   bool
+		file string
+	}
 }
 
 func (s *State) Init() {
 	s.m.Lock()
 	defer s.m.Unlock()
+	defer func() {
+		go s.save()
+	}()
+
 	s.width = InitialScreenWidth
 	s.height = InitialScreenHeight
 	s.zoom = InitialZoom
 	s.speed = InitialSpeed
 	s.paused = true
+
+	var err error
+	config := s.config()
+	if err = config.ensure(); err != nil {
+		fmt.Println("error ensuring config", err)
+		return
+	}
+	if config.load(); err != nil {
+		fmt.Println("error loading config", err)
+		return
+	}
+	s.fromConfig(config)
+}
+
+func (s *State) fromConfig(config config) {
+	if !config.ok {
+		return
+	}
+	s.width = config.Width
+	s.height = config.Height
+	s.zoom = config.Zoom
+	s.speed = config.Speed
+	s._config.ok = config.ok
+	s._config.file = config.file
+}
+
+func (s *State) config() (config config) {
+	config.Width = s.width
+	config.Height = s.height
+	config.Zoom = s.zoom
+	config.Speed = s.speed
+	config.ok = s._config.ok
+	config.file = s._config.file
+	return
+}
+
+func (s *State) save() {
+	if err := s.config().save(); err != nil {
+		fmt.Println("saving config", err)
+	}
 }
 
 func (s *State) Paused() bool {
@@ -70,12 +121,18 @@ func (s *State) PlayPause() {
 func (s *State) ZoomIn() {
 	s.m.Lock()
 	defer s.m.Unlock()
+	defer func() {
+		go s.save()
+	}()
 	s.zoom++
 }
 
 func (s *State) ZoomOut() {
 	s.m.Lock()
 	defer s.m.Unlock()
+	defer func() {
+		go s.save()
+	}()
 	s.zoom--
 }
 
@@ -94,12 +151,18 @@ func (s *State) CanZoomOut() bool {
 func (s *State) Fast() {
 	s.m.Lock()
 	defer s.m.Unlock()
+	defer func() {
+		go s.save()
+	}()
 	s.speed--
 }
 
 func (s *State) Slow() {
 	s.m.Lock()
 	defer s.m.Unlock()
+	defer func() {
+		go s.save()
+	}()
 	s.speed++
 }
 

@@ -1,5 +1,8 @@
 package internal
 
+const Title = "Game of Life"
+const PackageName = "game-of-life"
+
 const InitialScreenWidth = 640
 const InitialScreenHeight = 480
 const InitialZoom = 2
