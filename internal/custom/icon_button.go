@@ -11,7 +11,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-func NewIconButton(icon assets.Icon, clickedHandler func()) *widget.Button {
+func NewIconButton(icon assets.Icon, clickedHandler func(), toolTipContent widget.PreferredSizeLocateableWidget) *widget.Button {
 	var img image.Image
 	var err error
 
@@ -42,6 +42,11 @@ func NewIconButton(icon assets.Icon, clickedHandler func()) *widget.Button {
 			MaxHeight: buttonSize,
 		})),
 	)
+
+	if toolTipContent != nil {
+		tooltip := NewTooltip(toolTipContent)
+		button.Configure(widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.ToolTip(tooltip)))
+	}
 
 	return button
 }

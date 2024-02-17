@@ -19,11 +19,11 @@ type State struct {
 }
 
 func (s *State) Init() {
-	s.m.Lock()
-	defer s.m.Unlock()
 	defer func() {
 		go s.save()
 	}()
+	s.m.Lock()
+	defer s.m.Unlock()
 
 	s.width = InitialScreenWidth
 	s.height = InitialScreenHeight
@@ -67,6 +67,8 @@ func (s *State) config() (config config) {
 }
 
 func (s *State) save() {
+	s.m.Lock()
+	defer s.m.Unlock()
 	if err := s.config().save(); err != nil {
 		fmt.Println("saving config", err)
 	}
@@ -119,20 +121,20 @@ func (s *State) PlayPause() {
 }
 
 func (s *State) ZoomIn() {
-	s.m.Lock()
-	defer s.m.Unlock()
 	defer func() {
 		go s.save()
 	}()
+	s.m.Lock()
+	defer s.m.Unlock()
 	s.zoom++
 }
 
 func (s *State) ZoomOut() {
-	s.m.Lock()
-	defer s.m.Unlock()
 	defer func() {
 		go s.save()
 	}()
+	s.m.Lock()
+	defer s.m.Unlock()
 	s.zoom--
 }
 
@@ -149,20 +151,20 @@ func (s *State) CanZoomOut() bool {
 }
 
 func (s *State) Fast() {
-	s.m.Lock()
-	defer s.m.Unlock()
 	defer func() {
 		go s.save()
 	}()
+	s.m.Lock()
+	defer s.m.Unlock()
 	s.speed--
 }
 
 func (s *State) Slow() {
-	s.m.Lock()
-	defer s.m.Unlock()
 	defer func() {
 		go s.save()
 	}()
+	s.m.Lock()
+	defer s.m.Unlock()
 	s.speed++
 }
 

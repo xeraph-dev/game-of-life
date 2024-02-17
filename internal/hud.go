@@ -45,14 +45,14 @@ func (h *HUD) Init(opts HUDOptions) {
 		)),
 	)
 
-	h.play = custom.NewIconButton(assets.PlayIcon, opts.Play)
-	h.pause = custom.NewIconButton(assets.PauseIcon, opts.Pause)
-	h.zoomIn = custom.NewIconButton(assets.PlusIcon, opts.ZoomIn)
-	h.zoomOut = custom.NewIconButton(assets.MinusIcon, opts.ZoomOut)
-	h.fast = custom.NewIconButton(assets.FastIcon, opts.Fast)
-	h.slow = custom.NewIconButton(assets.SlowIcon, opts.Slow)
-	h.step = custom.NewIconButton(assets.StepIcon, opts.Step)
-	h.restart = custom.NewIconButton(assets.RestartIcon, opts.Restart)
+	h.play = custom.NewIconButton(assets.PlayIcon, opts.Play, custom.NewShortcut("play the world", assets.PlayIcon))
+	h.pause = custom.NewIconButton(assets.PauseIcon, opts.Pause, custom.NewShortcut("pause the world", assets.PlayIcon))
+	h.zoomIn = custom.NewIconButton(assets.PlusIcon, opts.ZoomIn, custom.NewShortcut("increase cell's size", assets.PlayIcon))
+	h.zoomOut = custom.NewIconButton(assets.MinusIcon, opts.ZoomOut, custom.NewShortcut("decrease cell's size", assets.PlayIcon))
+	h.fast = custom.NewIconButton(assets.FastIcon, opts.Fast, custom.NewShortcut("increase generation speed", assets.PlayIcon))
+	h.slow = custom.NewIconButton(assets.SlowIcon, opts.Slow, custom.NewShortcut("decrease generation speed", assets.PlayIcon))
+	h.step = custom.NewIconButton(assets.StepIcon, opts.Step, custom.NewShortcut("advance one generation", assets.PlayIcon))
+	h.restart = custom.NewIconButton(assets.RestartIcon, opts.Restart, custom.NewShortcut("regenerate the world", assets.KeyRIcon))
 
 	buttonsContainer := widget.NewContainer(
 		widget.ContainerOpts.Layout(widget.NewRowLayout(
@@ -93,7 +93,7 @@ func (h *HUD) Init(opts HUDOptions) {
 		panic(err)
 	}
 	face := truetype.NewFace(ttfFont, &truetype.Options{
-		Size: 24,
+		Size: 18,
 	})
 
 	h.fps = widget.NewLabel(

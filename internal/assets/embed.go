@@ -2,29 +2,6 @@ package assets
 
 import _ "embed"
 
-type Icon struct {
-	Idle     []byte
-	Disabled []byte
-}
-
-func newIcon(idle []byte, disabled []byte) Icon {
-	return Icon{
-		Idle:     idle,
-		Disabled: disabled,
-	}
-}
-
-var (
-	PlayIcon    = newIcon(playFilled, playOutline)
-	PauseIcon   = newIcon(pauseFilled, pauseOutline)
-	PlusIcon    = newIcon(plusFilled, plusOutline)
-	MinusIcon   = newIcon(minusFilled, minusOutline)
-	SlowIcon    = newIcon(slowFilled, slowOutline)
-	FastIcon    = newIcon(fastFilled, fastOutline)
-	StepIcon    = newIcon(stepFilled, stepOutline)
-	RestartIcon = newIcon(restart, restart)
-)
-
 //go:embed icons/play_filled.png
 var playFilled []byte
 
@@ -69,3 +46,6 @@ var stepOutline []byte
 
 //go:embed icons/restart.png
 var restart []byte
+
+//go:embed icons/key_r.png
+var keyR []byte
