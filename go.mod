@@ -1,6 +1,6 @@
 module game-of-life
 
-go 1.21.6
+go 1.22.0
 
 require (
 	github.com/ebitenui/ebitenui v0.5.5
