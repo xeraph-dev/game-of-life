@@ -4,12 +4,10 @@ import (
 	"bytes"
 	"game-of-life/internal/assets"
 	"image"
-	"image/color"
 
 	eimage "github.com/ebitenui/ebitenui/image"
 	"github.com/ebitenui/ebitenui/widget"
 	"github.com/hajimehoshi/ebiten/v2"
-	"golang.org/x/image/font"
 )
 
 func NewShortcut(text string, icon assets.Icon) *widget.Container {
@@ -20,29 +18,10 @@ func NewShortcut(text string, icon assets.Icon) *widget.Container {
 		)),
 	)
 
-	container.AddChild(NewShortcutLabel(text))
+	container.AddChild(NewText(text))
 	container.AddChild(NewShortcutIcon(icon))
 
 	return container
-}
-
-func NewShortcutLabel(text string) *widget.Text {
-
-	var err error
-	var face font.Face
-
-	if face, err = assets.LoadFont(16); err != nil {
-		panic(err)
-	}
-
-	return widget.NewText(
-		widget.TextOpts.Text(text, face, color.White),
-		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(
-			widget.RowLayoutData{
-				Position: widget.RowLayoutPositionCenter,
-			},
-		)),
-	)
 }
 
 func NewShortcutIcon(icon assets.Icon) *widget.Container {

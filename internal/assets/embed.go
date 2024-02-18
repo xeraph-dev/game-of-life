@@ -70,3 +70,15 @@ var keyMinus []byte
 
 //go:embed icons/key_space.png
 var keySpace []byte
+
+//go:embed icons/left_filled.png
+var leftFilled []byte
+
+//go:embed icons/left_outline.png
+var leftOutline []byte
+
+//go:embed icons/right_filled.png
+var rightFilled []byte
+
+//go:embed icons/right_outline.png
+var rightOutline []byte

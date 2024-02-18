@@ -7,7 +7,9 @@ import (
 )
 
 func main() {
-	ebiten.SetWindowSize(internal.InitialScreenWidth, internal.InitialScreenHeight)
+	r := internal.InitialResolution
+
+	ebiten.SetWindowSize(r.Width, r.Height)
 	ebiten.SetWindowTitle(internal.Title)
 	ebiten.SetTPS(ebiten.DefaultTPS / internal.InitialSpeed)
 

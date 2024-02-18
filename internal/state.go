@@ -6,8 +6,7 @@ import (
 )
 
 type State struct {
-	width   int
-	height  int
+	res     Resolution
 	zoom    int
 	paused  bool
 	speed   int
@@ -27,8 +26,7 @@ func (s *State) Init() {
 	s.m.Lock()
 	defer s.m.Unlock()
 
-	s.width = InitialScreenWidth
-	s.height = InitialScreenHeight
+	s.res = InitialResolution
 	s.zoom = InitialZoom
 	s.speed = InitialSpeed
 	s.paused = true
@@ -50,8 +48,7 @@ func (s *State) fromConfig(config config) {
 	if !config.ok {
 		return
 	}
-	s.width = config.Width
-	s.height = config.Height
+	s.res = NewResolution(config.Width, config.Height)
 	s.zoom = config.Zoom
 	s.speed = config.Speed
 	s._config.ok = config.ok
@@ -59,8 +56,8 @@ func (s *State) fromConfig(config config) {
 }
 
 func (s *State) config() (config config) {
-	config.Width = s.width
-	config.Height = s.height
+	config.Width = s.res.Width
+	config.Height = s.res.Height
 	config.Zoom = s.zoom
 	config.Speed = s.speed
 	config.ok = s._config.ok
@@ -88,16 +85,6 @@ func (s *State) Speed() int {
 	return s.speed
 }
 
-func (s *State) Width() int {
-	s.m.Lock()
-	defer s.m.Unlock()
-	return s.width
-}
-func (s *State) Height() int {
-	s.m.Lock()
-	defer s.m.Unlock()
-	return s.height
-}
 func (s *State) Zoom() int {
 	s.m.Lock()
 	defer s.m.Unlock()
@@ -180,4 +167,40 @@ func (s *State) CanSlow() bool {
 	s.m.Lock()
 	defer s.m.Unlock()
 	return !s.paused && s.speed < MaxSpeed
+}
+
+func (s *State) Resolution() Resolution {
+	s.m.Lock()
+	defer s.m.Unlock()
+	return s.res
+}
+
+func (s *State) ResolutionUp() {
+	defer func() {
+		go s.save()
+	}()
+	s.m.Lock()
+	defer s.m.Unlock()
+	s.res.Up()
+}
+
+func (s *State) ResolutionDown() {
+	defer func() {
+		go s.save()
+	}()
+	s.m.Lock()
+	defer s.m.Unlock()
+	s.res.Down()
+}
+
+func (s *State) CanResolutionUp() bool {
+	s.m.Lock()
+	defer s.m.Unlock()
+	return s.paused && s.res.Lower(MaxResolution)
+}
+
+func (s *State) CanResolutionDown() bool {
+	s.m.Lock()
+	defer s.m.Unlock()
+	return s.paused && s.res.Greater(MinResolution)
 }

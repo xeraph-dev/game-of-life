@@ -10,4 +10,6 @@ type Actions interface {
 	Fast()
 	Slow()
 	Step()
+	ResolutionUp()
+	ResolutionDown()
 }

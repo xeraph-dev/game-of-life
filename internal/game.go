@@ -13,14 +13,34 @@ type Game struct {
 func NewGame() (g *Game) {
 	g = new(Game)
 	state.Init()
-	g.InitWorld()
+	g.world.Init()
 	g.hud.Init(g)
 	g.input.Init(g)
+	g.OnResolutionChange()
 	return
 }
 
-func (g *Game) InitWorld() {
+func (g *Game) OnResolutionChange() {
 	g.world.Init()
+	g.hud.UpdateResText()
+	res := state.Resolution()
+	ebiten.SetWindowSize(res.Width, res.Height)
+}
+
+func (g *Game) ResolutionUp() {
+	if state.CanResolutionUp() {
+		g.Pause()
+		state.ResolutionUp()
+		g.OnResolutionChange()
+	}
+}
+
+func (g *Game) ResolutionDown() {
+	if state.CanResolutionDown() {
+		g.Pause()
+		state.ResolutionDown()
+		g.OnResolutionChange()
+	}
 }
 
 func (g *Game) Play() {
@@ -39,20 +59,20 @@ func (g *Game) PlayPause() {
 
 func (g *Game) Restart() {
 	g.Pause()
-	g.InitWorld()
+	g.world.Init()
 }
 
 func (g *Game) ZoomIn() {
 	if state.CanZoomIn() {
 		state.ZoomIn()
-		g.InitWorld()
+		g.world.Init()
 	}
 }
 
 func (g *Game) ZoomOut() {
 	if state.CanZoomOut() {
 		state.ZoomOut()
-		g.InitWorld()
+		g.world.Init()
 	}
 }
 

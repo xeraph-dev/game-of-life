@@ -8,9 +8,8 @@ import (
 
 	"github.com/ebitenui/ebitenui"
 	"github.com/ebitenui/ebitenui/widget"
-	"github.com/golang/freetype/truetype"
 	"github.com/hajimehoshi/ebiten/v2"
-	"golang.org/x/image/font/gofont/goregular"
+	"golang.org/x/image/font"
 )
 
 type HUD struct {
@@ -24,17 +23,65 @@ type HUD struct {
 	step    *widget.Button
 	restart *widget.Button
 	fps     *widget.Label
+	resDown *widget.Button
+	resUp   *widget.Button
+	resText *widget.Text
 }
 
 func (h *HUD) Init(actions Actions) {
 	h.ui = new(ebitenui.UI)
 
+	h.initContainer()
+	h.initFPS()
+	h.initButtons(actions)
+	h.initResolutions(actions)
+}
+
+func (h *HUD) initContainer() {
 	h.ui.Container = widget.NewContainer(
+		widget.ContainerOpts.Layout(widget.NewStackedLayout(
+			widget.StackedLayoutOpts.Padding(widget.NewInsetsSimple(4)),
+		)),
+	)
+}
+
+func (h *HUD) initFPS() {
+	root := widget.NewContainer(
+		widget.ContainerOpts.Layout(widget.NewAnchorLayout()),
+	)
+
+	container := widget.NewContainer(
 		widget.ContainerOpts.Layout(widget.NewAnchorLayout(
-			widget.AnchorLayoutOpts.Padding(widget.NewInsetsSimple(4)),
+			widget.AnchorLayoutOpts.Padding(widget.Insets{Top: 6}),
+		)),
+		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(
+			widget.AnchorLayoutData{
+				HorizontalPosition: widget.AnchorLayoutPositionStart,
+			},
 		)),
 	)
 
+	var err error
+	var face font.Face
+	if face, err = assets.LoadFont(18); err != nil {
+		panic(err)
+	}
+
+	h.fps = widget.NewLabel(
+		widget.LabelOpts.Text("FPS", face, &widget.LabelColor{
+			Idle: color.White,
+		}),
+		widget.LabelOpts.TextOpts(
+			widget.TextOpts.Position(widget.TextPositionCenter, widget.TextPositionCenter),
+		),
+	)
+
+	container.AddChild(h.fps)
+	root.AddChild(container)
+	h.ui.Container.AddChild(root)
+}
+
+func (h *HUD) initButtons(actions Actions) {
 	h.play = custom.NewIconButton(assets.PlayIcon, actions.Play, custom.NewShortcut("Play the world", assets.KeySpaceIcon))
 	h.pause = custom.NewIconButton(assets.PauseIcon, actions.Pause, custom.NewShortcut("Pause the world", assets.KeySpaceIcon))
 	h.zoomIn = custom.NewIconButton(assets.PlusIcon, actions.ZoomIn, custom.NewShortcut("Increase cell's size", assets.KeyPlusIcon))
@@ -44,61 +91,63 @@ func (h *HUD) Init(actions Actions) {
 	h.step = custom.NewIconButton(assets.StepIcon, actions.Step, custom.NewShortcut("Advance one generation", assets.KeyPeriodIcon))
 	h.restart = custom.NewIconButton(assets.RestartIcon, actions.Restart, custom.NewShortcut("Regenerate the world", assets.KeyRIcon))
 
-	buttonsContainer := widget.NewContainer(
+	root := widget.NewContainer(
+		widget.ContainerOpts.Layout(widget.NewAnchorLayout()),
+	)
+
+	container := widget.NewContainer(
 		widget.ContainerOpts.Layout(widget.NewRowLayout(
 			widget.RowLayoutOpts.Direction(widget.DirectionHorizontal),
 			widget.RowLayoutOpts.Spacing(2),
 		)),
-		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(
-			widget.AnchorLayoutData{
+		widget.ContainerOpts.WidgetOpts(
+			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
 				HorizontalPosition: widget.AnchorLayoutPositionCenter,
-			},
-		)),
+			}),
+		),
 	)
 
-	buttonsContainer.AddChild(h.restart)
-	buttonsContainer.AddChild(h.play)
-	buttonsContainer.AddChild(h.step)
-	buttonsContainer.AddChild(h.pause)
-	buttonsContainer.AddChild(h.zoomIn)
-	buttonsContainer.AddChild(h.zoomOut)
-	buttonsContainer.AddChild(h.slow)
-	buttonsContainer.AddChild(h.fast)
+	container.AddChild(h.restart)
+	container.AddChild(h.play)
+	container.AddChild(h.step)
+	container.AddChild(h.pause)
+	container.AddChild(h.zoomIn)
+	container.AddChild(h.zoomOut)
+	container.AddChild(h.slow)
+	container.AddChild(h.fast)
 
-	h.ui.Container.AddChild(buttonsContainer)
+	root.AddChild(container)
+	h.ui.Container.AddChild(root)
+}
 
-	fpsContainer := widget.NewContainer(
-		widget.ContainerOpts.Layout(widget.NewAnchorLayout(
-			widget.AnchorLayoutOpts.Padding(widget.NewInsetsSimple(6)),
-		)),
+func (h *HUD) initResolutions(actions Actions) {
+	root := widget.NewContainer(
+		widget.ContainerOpts.Layout(widget.NewAnchorLayout()),
+	)
+
+	container := widget.NewContainer(
+		widget.ContainerOpts.Layout(widget.NewAnchorLayout()),
 		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(
 			widget.AnchorLayoutData{
-				HorizontalPosition: widget.AnchorLayoutPositionStart,
+				HorizontalPosition: widget.AnchorLayoutPositionEnd,
 			},
 		)),
 	)
 
-	ttfFont, err := truetype.Parse(goregular.TTF)
-	if err != nil {
-		panic(err)
-	}
-	face := truetype.NewFace(ttfFont, &truetype.Options{
-		Size: 18,
-	})
+	var resContainer *widget.Container
+	h.resDown, resContainer, h.resUp, h.resText = custom.NewSelector("Change the resolution", state.res.String(), actions.ResolutionDown, actions.ResolutionUp)
 
-	h.fps = widget.NewLabel(
-		widget.LabelOpts.Text("FPS", face, &widget.LabelColor{
-			Idle: color.White,
-		}),
-	)
-
-	fpsContainer.AddChild(h.fps)
-
-	h.ui.Container.AddChild(fpsContainer)
+	container.AddChild(resContainer)
+	root.AddChild(container)
+	h.ui.Container.AddChild(root)
 }
 
 func (h *HUD) updateFps() {
 	h.fps.Label = "FPS: " + strconv.Itoa(int(ebiten.ActualFPS()))
+}
+
+func (h *HUD) UpdateResText() {
+	h.resText.Label = state.res.String()
 }
 
 func (h *HUD) handleDisableButtons() {
@@ -109,6 +158,8 @@ func (h *HUD) handleDisableButtons() {
 	h.zoomOut.GetWidget().Disabled = !state.CanZoomOut()
 	h.fast.GetWidget().Disabled = !state.CanFast()
 	h.slow.GetWidget().Disabled = !state.CanSlow()
+	h.resDown.GetWidget().Disabled = !state.CanResolutionDown()
+	h.resUp.GetWidget().Disabled = !state.CanResolutionUp()
 }
 
 func (h *HUD) Update() {

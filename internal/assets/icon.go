@@ -32,4 +32,6 @@ var (
 	KeyPlusIcon    = newIcon(keyPlus)
 	KeyMinusIcon   = newIcon(keyMinus)
 	KeySpaceIcon   = newIcon(keySpace)
+	LeftIcon       = newIcon(leftFilled).disabled(leftOutline)
+	RightIcon      = newIcon(rightFilled).disabled(rightOutline)
 )

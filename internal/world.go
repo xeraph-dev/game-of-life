@@ -9,8 +9,9 @@ type World struct {
 }
 
 func (w *World) Init() {
-	width := state.Width()
-	height := state.Height()
+	res := state.Resolution()
+	width := res.Width
+	height := res.Height
 	zoom := state.Zoom()
 
 	w.offset = width * 40
