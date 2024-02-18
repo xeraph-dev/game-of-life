@@ -5,10 +5,11 @@ import (
 )
 
 type Cell struct {
-	pixels    [][]Pixel
-	neighbors [8]*Cell
-	alive     bool
-	wasAlive  bool
+	pixels         [][]Pixel
+	neighbors      [8]*Cell
+	alive          bool
+	wasAlive       bool
+	timesInVirtual int
 }
 
 func (c *Cell) Init(pixels [][]Pixel, neighbors [8]*Cell) {
@@ -19,7 +20,12 @@ func (c *Cell) Init(pixels [][]Pixel, neighbors [8]*Cell) {
 	c.neighbors = neighbors
 }
 
-func (c *Cell) Update() {
+func (c *Cell) Update(maxTimesInVirtual int) {
+	if c.timesInVirtual >= maxTimesInVirtual {
+		c.alive = false
+		return
+	}
+
 	alive := 0
 	for _, cell := range c.neighbors {
 		if cell != nil && cell.wasAlive {
@@ -44,4 +50,12 @@ func (c *Cell) Draw() {
 		}
 	}
 	c.wasAlive = c.alive
+}
+
+func (c *Cell) InVirtual() {
+	c.timesInVirtual += 1
+}
+
+func (c *Cell) OutVirtual() {
+	c.timesInVirtual = 0
 }

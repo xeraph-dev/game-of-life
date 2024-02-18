@@ -20,7 +20,7 @@ func NewGame() (g *Game) {
 }
 
 func (g *Game) InitWorld() {
-	g.world.Init(state.Width(), state.Height(), state.Zoom())
+	g.world.Init()
 }
 
 func (g *Game) Play() {
