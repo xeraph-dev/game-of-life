@@ -25,12 +25,12 @@ func (c *config) ensure() (err error) {
 	var userConfigDir string
 	var f *os.File
 
-	if userConfigDir, err = os.UserHomeDir(); err != nil {
-		err = fmt.Errorf("getting the user home dir: %w", err)
+	if userConfigDir, err = os.UserConfigDir(); err != nil {
+		err = fmt.Errorf("getting the user config dir: %w", err)
 		return
 	}
 
-	configDir := path.Join(userConfigDir, ".games", PackageName)
+	configDir := path.Join(userConfigDir, PackageName)
 	if err = os.MkdirAll(configDir, os.ModePerm); err != nil {
 		err = fmt.Errorf("creating game config directory: %w", err)
 		return
